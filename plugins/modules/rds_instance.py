@@ -857,9 +857,12 @@ def get_parameters(client, module, parameters, method_name):
     if parameters.get('ProcessorFeatures') == [] and not method_name == 'modify_db_instance':
         parameters.pop('ProcessorFeatures')
 
-    if method_name in ['create_db_instance', 'create_db_instance_read_replica', 'restore_db_instance_from_db_snapshot']:
+    if method_name in ['create_db_instance', 'restore_db_instance_from_db_snapshot']:
         if parameters.get('Tags'):
             parameters['Tags'] = ansible_dict_to_boto3_tag_list(parameters['Tags'])
+    elif method_name in ['create_db_instance_read_replica']:
+        if parameters.get('Tags'):
+            parameters['Tags'] = list({'Key': k, 'Value': v} for k, v in parameters['Tags'].items())
 
     if method_name == 'modify_db_instance':
         parameters = get_options_with_changing_values(client, module, parameters)
